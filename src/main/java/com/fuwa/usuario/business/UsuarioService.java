@@ -7,6 +7,7 @@ import com.fuwa.usuario.infrastructure.entity.Usuario;
 import com.fuwa.usuario.infrastructure.exeptions.ConflictExeption;
 import com.fuwa.usuario.infrastructure.exeptions.ResorceNotFoundExeption;
 import com.fuwa.usuario.infrastructure.repository.UsuarioRepository;
+import com.fuwa.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioConverter usuarioConverter;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         emailExiste(usuarioDTO.getEmail());
@@ -49,6 +51,18 @@ public class UsuarioService {
     }
     public void deletaUsuarioPorEmail(String email){
         usuarioRepository.deleteByEmail(email);
+    }
+
+    public UsuarioDTO atualizaDadosUsuario(String token, UsuarioDTO dto){
+        String email =  jwtUtil.extractUsername(token.substring(7));
+
+        dto.setSenha(dto.getSenha() != null ? passwordEncoder.encode(dto.getSenha()) : null);
+
+        Usuario usuarioEntity = usuarioRepository.findByEmail(email).orElseThrow(() ->
+                new ResorceNotFoundExeption("Email não localizado"));
+
+        Usuario usuario = usuarioConverter.uptadeUsuario(dto, usuarioEntity);
+        return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
     }
 }
 
