@@ -8,6 +8,7 @@ import com.fuwa.usuario.business.converter.UsuarioConverter;
 import com.fuwa.usuario.infrastructure.entity.Endereco;
 import com.fuwa.usuario.infrastructure.entity.Telefone;
 import com.fuwa.usuario.infrastructure.entity.Usuario;
+
 import com.fuwa.usuario.infrastructure.exeptions.ConflictExeption;
 import com.fuwa.usuario.infrastructure.exeptions.ResorceNotFoundExeption;
 import com.fuwa.usuario.infrastructure.repository.EnderecoRepository;
@@ -94,5 +95,20 @@ public class UsuarioService {
 
         return usuarioConverter.paraTelefoneDTO(telefoneRepository.save(telefone));
     }
-}
+    public EnderecoDTO CadastraEndereco(String token, EnderecoDTO dto){
+        String email = jwtUtil.extractUsername(token.substring(7));
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResorceNotFoundExeption("Email não localizado " + email));
 
+        Endereco endereco =usuarioConverter.paraEnderecoEntity(dto, usuario.getId());
+        Endereco enderecoEntity = enderecoRepository.save(endereco);
+        return usuarioConverter.paraEnderecoDTO(enderecoEntity);
+    }
+
+    public TelefoneDTO CadastraTelefone(String token, TelefoneDTO dto){
+        String email = jwtUtil.extractUsername(token.substring(7));
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new ResorceNotFoundExeption("Email não localizado " + email));
+        Telefone telefone = usuarioConverter.paraTelefoneEntity(dto, usuario.getId());
+        Telefone telefoneEntity = telefoneRepository.save(telefone);
+        return usuarioConverter.paraTelefoneDTO(telefoneEntity);
+    }
+}
