@@ -4,6 +4,8 @@ import com.fuwa.usuario.business.DTO.EnderecoDTO;
 import com.fuwa.usuario.business.DTO.TelefoneDTO;
 import com.fuwa.usuario.business.DTO.UsuarioDTO;
 import com.fuwa.usuario.business.UsuarioService;
+import com.fuwa.usuario.business.ViaCepService;
+import com.fuwa.usuario.infrastructure.client.ViaCepDTO;
 import com.fuwa.usuario.infrastructure.entity.Usuario;
 import com.fuwa.usuario.infrastructure.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final ViaCepService viaCepService;
 
     @PostMapping
     public ResponseEntity<UsuarioDTO> salvaUsuario(@RequestBody UsuarioDTO usuarioDTO) {
@@ -34,7 +37,7 @@ public class UsuarioController {
                         usuarioDTO.getSenha())
 
         );
-        return "Bearer" + jwtUtil.generateToken(authentication.getName());
+        return "Bearer " + jwtUtil.generateToken(authentication.getName());
     }
 
     @GetMapping
@@ -75,5 +78,8 @@ public class UsuarioController {
                                                         @RequestHeader("Authorization") String token){
         return ResponseEntity.ok(usuarioService.CadastraTelefone(token, dto));
     }
-
+    @GetMapping("/endereco/{cep}")
+    public ResponseEntity<ViaCepDTO> BuscarDadosCep(@PathVariable("cep") String cep){
+        return ResponseEntity.ok(viaCepService.BuscarDadosCep(cep));
+    }
 }
